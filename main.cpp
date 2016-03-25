@@ -32,29 +32,23 @@ int main(int argc, char** argv) {
 
     typedef http::event<> http_t;
     worker.on<http_t>("http", [&](http_t::fresh_sender tx, http_t::fresh_receiver){
-	auto future = logger.invoke<cocaine::io::base_log::get>(backend).then(
-		[&](task<channel<cocaine::io::base_log::get>>::future_move_type fut) {
-			auto channel = fut.get();
-			auto tx = std::move(channel.tx);
-    			auto rx = std::move(channel.rx);
-			std::vector<task<boost::optional<bool>>::future_type> futures;
-			cocaine::logging::attributes_t attributes;
-			attributes.push_back(cocaine::logging::attribute_t{std::string("attribute1"), cocaine::dynamic_t("attribute1_value")});
-			attributes.push_back(cocaine::logging::attribute_t{std::string("attribute2"), cocaine::dynamic_t("attribute2_value")});
-			attributes.push_back(cocaine::logging::attribute_t{std::string("attribute3"), cocaine::dynamic_t("attribute3_value")});
-			attributes.push_back(cocaine::logging::attribute_t{std::string("attribute4"), cocaine::dynamic_t("attribute4_value")});
-			attributes.push_back(cocaine::logging::attribute_t{std::string("attribute5"), cocaine::dynamic_t("attribute5_value")});
-			for (uint id = 0; id < iters; ++id) {
-      				tx = tx.send<cocaine::io::named_log::emit_ack>(2, "log string", attributes).get();
-				futures.emplace_back(rx.recv());
-			}
-			for (auto& future : futures) {
-		            future.get();
-			}
+		auto channel = logger.invoke<cocaine::io::base_log::get>(backend).get();
+		auto l_tx = std::move(channel.tx);
+	    auto l_rx = std::move(channel.rx);
+		std::vector<task<boost::optional<bool>>::future_type> futures;
+		cocaine::logging::attributes_t attributes;
+		attributes.push_back(cocaine::logging::attribute_t{std::string("attribute1"), cocaine::dynamic_t("attribute1_value")});
+		attributes.push_back(cocaine::logging::attribute_t{std::string("attribute2"), cocaine::dynamic_t("attribute2_value")});
+		attributes.push_back(cocaine::logging::attribute_t{std::string("attribute3"), cocaine::dynamic_t("attribute3_value")});
+		attributes.push_back(cocaine::logging::attribute_t{std::string("attribute4"), cocaine::dynamic_t("attribute4_value")});
+		attributes.push_back(cocaine::logging::attribute_t{std::string("attribute5"), cocaine::dynamic_t("attribute5_value")});
+		for (uint id = 0; id < iters; ++id) {
+			l_tx = l_tx.send<cocaine::io::named_log::emit_ack>(2, "log string", attributes).get();
+			futures.emplace_back(l_rx.recv());
 		}
-	);
-	future.get();
-			
+		for (auto& future : futures) {
+	       future.get();
+		}
         http_response_t rs;
         rs.code = 200;
         tx.send(std::move(rs)).get()
