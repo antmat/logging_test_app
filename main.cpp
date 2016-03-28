@@ -34,7 +34,7 @@ const cocaine::logging::attributes_t& make_attributes() {
 int main(int argc, char** argv) {
 
     service_manager_t manager(1), m_manager(1);
-    uint iters        = 100;
+    uint iters        = 1000;
     unsigned int verbosity = 0;
 
 
