@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     typedef http::event<> http_t;
     worker.on<http_t>("new_ack", [&](http_t::fresh_sender tx, http_t::fresh_receiver rx) {
         std::string service   = "logging::v2";
-		auto logger = manager.create<cocaine::io::base_log_tag>(service);
+		static auto logger = manager.create<cocaine::io::base_log_tag>(service);
 		std::string backend("logger_test_app");
 		logger.connect().get();
 		auto channel = logger.invoke<cocaine::io::base_log::get>(backend).get();
