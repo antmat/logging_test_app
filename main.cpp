@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
 
     typedef http::event<> http_t;
     worker.on<http_t>("new_ack", [&](http_t::fresh_sender tx, http_t::fresh_receiver rx) {
-        std::string service   = "logging::v2";
+        static std::string service   = "logging::v2";
 		static auto logger = manager.create<cocaine::io::base_log_tag>(service);
 		std::string backend("logger_test_app");
 		logger.connect().get();
@@ -65,8 +65,8 @@ int main(int argc, char** argv) {
 
     typedef http::event<> http_t;
     worker.on<http_t>("new", [&](http_t::fresh_sender tx, http_t::fresh_receiver rx) {
-        std::string service   = "logging::v2";
-        auto logger = manager.create<cocaine::io::base_log_tag>(service);
+        static std::string service   = "logging::v2";
+        static auto logger = manager.create<cocaine::io::base_log_tag>(service);
         std::string backend("logger_test_app");
         logger.connect().get();
         auto channel = logger.invoke<cocaine::io::base_log::get>(backend).get();
@@ -82,8 +82,8 @@ int main(int argc, char** argv) {
     });
 
     worker.on<http_t>("new_plain", [&](http_t::fresh_sender tx, http_t::fresh_receiver rx) {
-        std::string service   = "logging::v2";
-        auto logger = manager.create<cocaine::io::base_log_tag>(service);
+        static std::string service   = "logging::v2";
+        static auto logger = manager.create<cocaine::io::base_log_tag>(service);
         std::string backend("logger_test_app");
         logger.connect().get();
         for (uint id = 0; id < iters; ++id) {
@@ -96,8 +96,8 @@ int main(int argc, char** argv) {
     });
 
     worker.on<http_t>("new_plain_ack", [&](http_t::fresh_sender tx, http_t::fresh_receiver rx) {
-        std::string service   = "logging::v2";
-        auto logger = manager.create<cocaine::io::base_log_tag>(service);
+        static std::string service   = "logging::v2";
+        static auto logger = manager.create<cocaine::io::base_log_tag>(service);
         std::string backend("logger_test_app");
         logger.connect().get();
         std::vector<task<bool>::future_type> futures;
@@ -115,8 +115,8 @@ int main(int argc, char** argv) {
 
 
     worker.on<http_t>("old", [&](http_t::fresh_sender tx, http_t::fresh_receiver rx) {
-        std::string service   = "logging";
-        auto logger = manager.create<cocaine::io::base_log_tag>(service);
+        static std::string service   = "logging";
+        static auto logger = manager.create<cocaine::io::base_log_tag>(service);
         std::string backend("logger_test_app");
         logger.connect().get();
         auto channel = logger.invoke<cocaine::io::base_log::get>(backend).get();
